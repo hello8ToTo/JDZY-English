@@ -4,15 +4,39 @@ const storeKey = 'global-drive-progress-v1';
 const state = JSON.parse(localStorage.getItem(storeKey) || '{"records":[]}');
 const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
 
-const pageTitles = { home: '课程驾驶舱', decoder: '需求解码器', talk: '交流互动台', delivery: '交付保障处', progress: '我的学习档案' };
+const pageTitles = { home: '课程驾驶舱', decoder: '需求解码器', talk: '交流互动台', delivery: '交付保障处', showroom: '车展区', progress: '我的学习档案' };
 function switchView(view) {
   $$('.screen').forEach(screen => screen.classList.toggle('active', screen.id === view));
   $$('.nav-trigger').forEach(button => button.classList.toggle('active', button.dataset.view === view));
   $('#top-title').textContent = pageTitles[view];
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (view === 'progress') renderProgress();
+  const showroomFrame = $('#showroom-frame');
+  if (view === 'showroom' && !showroomFrame.getAttribute('src')) {
+    showroomFrame.addEventListener('load', () => {
+      showroomFrame.contentWindow.postMessage({ type: 'global-drive-showroom-visibility', visible: $('#showroom').classList.contains('active') }, '*');
+    });
+    showroomFrame.src = showroomFrame.dataset.src;
+  }
+  if (showroomFrame.getAttribute('src')) {
+    showroomFrame.contentWindow.postMessage({ type: 'global-drive-showroom-visibility', visible: view === 'showroom' }, '*');
+  }
 }
 $$('.nav-trigger').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
+
+// 浏览器不允许原生全屏时，只将车展 iframe 扩展到网页视口。
+let showroomOverflow = null;
+window.addEventListener('message', event => {
+  const frame = $('#showroom-frame');
+  if (event.source !== frame.contentWindow || event.data?.type !== 'global-drive-showroom-fullscreen') return;
+  const active = event.data.active === true && $('#showroom').classList.contains('active');
+  frame.parentElement.classList.toggle('showroom-web-fullscreen', active);
+  if (active && showroomOverflow === null) { showroomOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
+  if (!active && showroomOverflow !== null) { document.body.style.overflow = showroomOverflow; showroomOverflow = null; }
+});
+window.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && showroomOverflow !== null) $('#showroom-frame').contentWindow.postMessage({type:'global-drive-showroom-exit-fullscreen'}, '*');
+});
 
 // 需求解码器：固定国家案例库 + 随机案例库
 const makeCase = (id, country, flag, title, body, terms) => ({ id, country, flag, title, body, terms: terms.map(([key, text, type]) => ({ key, text, type })) });
@@ -38,7 +62,7 @@ const caseBank = {
     makeCase('my-3', '马来西亚', '🇲🇾', '槟城科技园员工通勤车队', 'Hello, our Penang technology park plans to provide {{service}} for staff. The route is {{route}} and runs {{schedule}}. We need {{safety}} for shift workers. We are still discussing {{quantity}}, {{charging}}, and {{maintenance}}.', [['service','shared commuting vehicles','confirmed'],['route','a fixed 90 km round trip','confirmed'],['schedule','morning and late-night shifts','confirmed'],['safety','safe and reliable transport after dark','confirmed'],['quantity','the number of vehicles needed','ask'],['charging','charger installation at the technology park','ask'],['maintenance','local fleet maintenance support','ask']])
   ]
 };
-const countryMeta = { thailand: { label: '泰国', code: 'TH', flag: 'flag-thailand.svg' }, indonesia: { label: '印度尼西亚', code: 'ID', flag: 'flag-indonesia.svg' }, vietnam: { label: '越南', code: 'VN', flag: 'flag-vietnam.svg' }, malaysia: { label: '马来西亚', code: 'MY', flag: 'flag-malaysia.svg' } };
+const countryMeta = { thailand: { label: '泰国', code: 'TH', flag: 'assets/flag-thailand.svg' }, indonesia: { label: '印度尼西亚', code: 'ID', flag: 'assets/flag-indonesia.svg' }, vietnam: { label: '越南', code: 'VN', flag: 'assets/flag-vietnam.svg' }, malaysia: { label: '马来西亚', code: 'MY', flag: 'assets/flag-malaysia.svg' } };
 const allCases = Object.values(caseBank).flat();
 let decoderMode = 'fixed', selectedCountry = 'thailand', caseIndex = 0, randomCase = null;
 let decodeMarks = [], placements = new Map();

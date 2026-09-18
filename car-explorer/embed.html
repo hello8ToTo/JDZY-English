@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>车展区 · 五菱汽车部件探索</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="embed.css">
+</head>
+<body>
+  <aside>
+    <div class="section-label">PARTS / 汽车部件</div>
+    <h1>部件探索</h1>
+    <nav id="parts" aria-label="汽车部件"></nav>
+  </aside>
+  <main>
+    <header><div><span class="eyebrow">汽车结构 · 交互展示</span><h2>五菱汽车<span>360°</span></h2></div><button id="reset">↺ <span>重置视角</span></button></header>
+    <section id="stage" aria-label="汽车三维交互展示">
+      <div id="loading" role="status"><div class="spinner"></div><strong>正在加载汽车模型</strong><span id="progress">首次打开需要片刻</span></div>
+      <svg id="leaders" aria-hidden="true"></svg><div id="cards"></div>
+      <div class="view-controls"><button data-view="front">前侧</button><button data-view="back">后侧</button><button data-view="left">左侧</button><button data-view="right">右侧</button></div>
+      <div class="scene-help"><span>拖动旋转</span><i></i><span>滚轮 / 双指缩放</span><i></i><span>中英文框可拖动</span></div>
+      <button id="fullscreen" type="button" aria-pressed="false" title="全屏展示汽车模型"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg><span>全屏展示</span></button>
+      <div id="speech-status" role="status" aria-live="polite"></div>
+    </section>
+    <footer><span></span><span id="count">12 个交互部件</span></footer>
+  </main>
+  <script src="explorer.bundle.js"></script>
+</body>
+</html>

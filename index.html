@@ -6,6 +6,7 @@
   <meta name="description" content="Global Drive 新能源汽车海外销售英语实训系统" />
   <title>Global Drive｜新能源汽车海外销售英语实训系统</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="showroom.css" />
   <style>
     .decoder-library-home{padding:26px 28px;background:#fff;border:1px solid #d9eafa;border-radius:20px;box-shadow:0 9px 25px rgba(26,77,138,.07)}.library-top{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:20px}.library-top h3{font-size:24px;margin:7px 0 0}.case-mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}.mode-card{min-height:190px;padding:26px;border:1px solid #cfe1f8;border-radius:16px;background:#fff;text-align:left;position:relative;cursor:pointer;transition:.2s ease}.mode-card:hover{transform:translateY(-2px);border-color:#2872e5;box-shadow:0 9px 20px rgba(39,96,205,.1)}.mode-card.random-mode{background:linear-gradient(135deg,#f2ffff,#f2f7ff);border-color:#a9e2e8}.mode-card .mode-mark{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-bottom:20px;border-radius:10px;background:#eaf3ff;color:#1469d9;font-size:20px}.mode-card.random-mode .mode-mark{background:#dff8fa;color:#0799a5}.mode-card .mono{display:block;margin-bottom:7px}.mode-card h3{margin:0 0 9px;font-size:25px;color:#0b3168}.mode-card p{max-width:440px;margin:0;color:#6382a5;line-height:1.7}.mode-card button{position:absolute;left:26px;bottom:23px;border:0;background:transparent;padding:0;color:#126fed;font:600 13px "Microsoft YaHei";cursor:pointer}.mode-card.random-mode button{color:#0797a3}.fixed-library-head{display:flex;align-items:center;gap:16px}.fixed-library-head h3{font-size:24px;margin:7px 0 0}.case-library-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.library-card{min-height:148px;padding:18px;border:1px solid #dceafa;border-radius:14px;background:#fff;text-align:left;position:relative;overflow:hidden}.library-card.active{border-color:#bfd7fa;cursor:pointer}.library-card.active:hover{border-color:#2872e5;box-shadow:0 7px 16px rgba(39,96,205,.1);transform:translateY(-2px)}.library-card .country-code{display:flex;align-items:center;gap:9px;margin-bottom:17px;font:700 22px/1 Consolas,monospace;color:#164d97;letter-spacing:.02em}.library-card .country-flag{display:block;width:27px;height:18px;object-fit:cover;border:1px solid rgba(9,45,92,.13);border-radius:3px;box-shadow:0 1px 2px rgba(9,45,92,.08)}.library-card h4{margin:6px 0 0;font-size:17px;color:#0b3168}.library-card.active h4{margin:0;font-size:24px;line-height:1.2;letter-spacing:.02em}.library-card p{display:none}.library-card button{position:absolute;left:18px;right:18px;bottom:15px;display:flex;align-items:center;justify-content:space-between;border:0;background:transparent;padding:0;color:#126fed;font:600 12px "Microsoft YaHei";cursor:pointer}.library-card button span{font-size:16px;line-height:1}.library-card.pending{color:#95a6ba;background:#f7f9fc}.library-card.pending h4{color:#8496ac}.library-card .case-count{font:11px Consolas,monospace;color:#4a7dc3}.case-title-line{display:flex;align-items:center;gap:9px;margin:7px 0 16px}.case-title-line .flag{font-size:20px}.case-title-line h3{margin:0}.case-title-line .case-order{font:12px Consolas,monospace;color:#5e80aa}.decoder-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:15px}.random-note{font-size:12px;color:#477aa9}.clear-record{white-space:nowrap}@media(max-width:950px){.case-library-cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.library-top,.decoder-footer,.fixed-library-head{align-items:flex-start;flex-direction:column}.clear-record{width:100%}.case-mode-cards,.case-library-cards{grid-template-columns:1fr}.mode-card{min-height:190px}.library-card{min-height:142px}}
   </style>
@@ -53,6 +54,7 @@
         <button class="nav-trigger" data-view="decoder"><span>01</span>需求解码器</button>
         <button class="nav-trigger" data-view="talk"><span>02</span>交流互动台</button>
         <button class="nav-trigger" data-view="delivery"><span>03</span>交付保障处</button>
+        <button class="nav-trigger" data-view="showroom"><span>04</span>车展区</button>
         <button class="nav-trigger" data-view="progress"><span>◎</span>我的学习档案</button>
       </nav>
       <div class="side-footer">AI提供场景与即时反馈<br>教师聚焦策略与表达。</div>
@@ -61,13 +63,12 @@
     <main>
       <header class="topbar">
         <div><span class="crumb">大学英语Ⅱ · 新能源汽车海外销售</span><h1 id="top-title">课程驾驶舱</h1></div>
-        <div class="school-mark"><span>广西机电职业技术学院</span><img src="gxjc-logo.png" alt="广西机电职业技术学院校徽" /></div>
       </header>
 
       <section class="screen active" id="home">
         <div class="hero">
           <div class="hero-copy"><h2><em>“Global Drive”</em><br>新能源汽车海外销售英语实训系统</h2><p>围绕“看懂客户—聊好客户—拿下客户”构建的课程专属训练平台，让英语学习在真实海外销售场景中发生。</p><button class="primary nav-trigger" data-view="decoder">开始今日任务 <b>→</b></button></div>
-          <div class="hero-image"><img src="hero-nev.png" alt="蓝色新能源汽车" /></div>
+          <div class="hero-image"><img src="assets/hero-nev.png" alt="蓝色新能源汽车" /></div>
         </div>
         <div class="overview">
           <div class="module-cards">
@@ -92,7 +93,7 @@
 
       <section class="screen" id="talk">
         <div class="screen-heading"><span class="mono">MODULE 02 · 聊好客户</span><h2>交流互动台</h2><p>听懂客户、确认已知信息，再提出一次真正有效的英语追问。</p></div>
-        <div class="client-row"><article class="client-profile"><img src="thai-narin.png" alt="泰国客户 Narin" /><div><span class="mono">RANDOM CUSTOMER · THAILAND</span><h3>Narin · 曼谷网约车司机</h3><p>“I drive passengers around Bangkok almost every day. I need a reliable EV, but I am still comparing a few options.”</p></div></article><article class="listen-card"><button id="play-client" class="play-button">▶</button><div><span class="mono">CLIENT INQUIRY · ABOUT 30 SECONDS</span><h3>听音取证</h3><p>点击播放，听完后完成右侧客户接待档案。</p></div><div class="equalizer"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article></div>
+        <div class="client-row"><article class="client-profile"><img src="assets/thai-narin.png" alt="泰国客户 Narin" /><div><span class="mono">RANDOM CUSTOMER · THAILAND</span><h3>Narin · 曼谷网约车司机</h3><p>“I drive passengers around Bangkok almost every day. I need a reliable EV, but I am still comparing a few options.”</p></div></article><article class="listen-card"><button id="play-client" class="play-button">▶</button><div><span class="mono">CLIENT INQUIRY · ABOUT 30 SECONDS</span><h3>听音取证</h3><p>点击播放，听完后完成右侧客户接待档案。</p></div><div class="equalizer"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article></div>
         <div class="talk-grid"><article class="known-card"><span class="mono label">I KNOW · CHECK AFTER LISTENING</span><h3>已确认信息</h3><p>勾选你从客户语音中确认听到的信息。</p><label><input type="checkbox" data-known="true" /> 每周高频使用车辆</label><label><input type="checkbox" data-known="true" /> 主要在曼谷市区接送乘客</label><label><input type="checkbox" data-known="true" /> 关注日常续航是否够用</label><label><input type="checkbox" data-known="true" /> 希望车辆可靠、适合长期使用</label><label><input type="checkbox" data-known="false" /> 预算不超过80万泰铢</label><label><input type="checkbox" data-known="false" /> 下周必须完成交付</label><button id="known-check" class="secondary">核验已确认信息</button><p id="known-feedback" class="feedback"></p></article>
           <article class="follow-card"><span class="mono label">I NEED TO ASK · CHOOSE ONE TOPIC</span><h3>待追问信息</h3><p>选择一项客户尚未说明的信息，再输入你的英语追问。</p><div class="topic-list" id="follow-options"><button data-topic="mileage">每日实际行驶里程</button><button data-topic="quantity">计划购买车辆数量</button><button data-topic="budget">预算范围与付款方式</button><button data-topic="charging">是否具备固定充电条件</button><button data-topic="delivery">希望的交付日期</button><button data-topic="priority">最关注续航、充电或售后中的哪一项</button></div><label class="question-label">My question to the client<input id="follow-question" placeholder="Could you tell me more about your daily mileage?" /></label><button id="ask-client" class="primary">发送问题，获取AI客户回复 →</button><div id="client-reply" class="client-reply hidden"></div></article></div>
       </section>
@@ -102,6 +103,11 @@
         <div class="delivery-grid"><article class="mission-card"><span class="mono label">30-SECOND MISSION</span><h3>录制一段询盘确认语音</h3><ol><li>确认两条已获得的客户信息</li><li>提出一条仍需澄清的问题</li><li>说明下一步沟通安排</li></ol><div class="language-help"><b>LANGUAGE SUPPORT</b><span>Let me make sure I understand correctly…</span><span>Could you tell me more about…?</span><span>I will send you more information after confirming this.</span></div></article>
           <article class="record-card"><div id="record-orb" class="record-orb">●</div><h3 id="record-title">点击开始录音</h3><p id="record-description">录制完成后可以回听，不满意可重新录制。</p><div id="audio-preview"></div><div class="record-actions"><button id="record-button" class="secondary">开始录音</button><button id="submit-record" class="primary" disabled>生成任务凭证</button></div></article>
           <article id="receipt" class="receipt hidden"><div class="receipt-head"><span class="mono">GLOBAL DRIVE</span><b>任务完成凭证</b></div><h3>客户接待 · 30秒确认</h3><p><span>✓ 已确认信息</span><b>2 项</b></p><p><span>？有效追问</span><b>1 项</b></p><p><span>AI语音提示</span><b>可回听后自行修订</b></p><small>本地演示版：可截图任务凭证，再由学习通收集小组作品。</small></article></div>
+      </section>
+
+      <section class="screen" id="showroom">
+        <div class="screen-heading"><span class="mono">MODULE 04 · 汽车部件探索</span><h2>车展区</h2><p>旋转观察汽车，点击部件查看中英文名称。</p></div>
+        <div class="showroom-shell"><iframe id="showroom-frame" data-src="car-explorer/embed.html" title="车展区 · 五菱汽车三维部件探索" allow="fullscreen" allowfullscreen></iframe></div>
       </section>
 
       <section class="screen" id="progress">

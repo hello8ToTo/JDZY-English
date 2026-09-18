@@ -1,0 +1,37 @@
+五菱汽车交互模型嵌入说明
+
+一、最简单的嵌入方式：iframe
+
+将下面代码放入对方系统的 HTML 页面中：
+
+<iframe
+  src="https://akai2026911.github.io/wulin-auto-explorer/"
+  title="五菱汽车部件交互展示"
+  style="width:100%;height:760px;border:0;display:block;"
+  allow="fullscreen"
+  loading="lazy">
+</iframe>
+
+建议外层系统给 iframe 设置至少 360px 的高度。手机端可以使用：
+
+<iframe
+  src="https://akai2026911.github.io/wulin-auto-explorer/"
+  title="五菱汽车部件交互展示"
+  style="width:100%;height:680px;border:0;display:block;"
+  allow="fullscreen">
+</iframe>
+
+二、本地部署方式
+
+1. 将本文件夹中的全部文件上传到对方网站的一个独立目录。
+2. 保持 index.html、app.js、style.css、wulin.glb 和 vendor 文件夹的相对路径不变。
+3. 在对方系统中用 iframe 指向该目录下的 index.html，例如：
+
+<iframe src="/car-explorer/index.html" title="五菱汽车部件交互展示" style="width:100%;height:760px;border:0"></iframe>
+
+三、注意事项
+
+- 不要只复制 index.html；模型文件 wulin.glb 和 vendor 文件夹也必须一起部署。
+- 服务器需要支持 .glb 文件，Content-Type 建议设置为 model/gltf-binary。
+- 如果系统使用严格的安全策略，需要允许脚本加载、WebGL 和同源的 .glb 文件。
+- 当前网页不需要安装插件，电脑和手机浏览器均使用 WebGL 加载。
