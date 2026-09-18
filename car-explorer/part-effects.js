@@ -22,8 +22,8 @@ export function buildPartSurfaces(meshes, identify) {
  return regions.map(vertices=>new T.BufferGeometry().setAttribute('position',new T.Float32BufferAttribute(vertices,3)));
 }
 
-export function createPartEffects(scene, meshes, identify, reducedMotion=false) {
- const surfaces=buildPartSurfaces(meshes,identify);
+export function createPartEffects(scene, meshes, identify, reducedMotion=false, preparedSurfaces=null) {
+ const surfaces=preparedSurfaces||buildPartSurfaces(meshes,identify);
  const highlightMaterial=new T.MeshBasicMaterial({color:0xffb020,transparent:true,opacity:0,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
  const lampEffects=createLampEffects(surfaces);
  const highlight=new T.Mesh(surfaces[0],highlightMaterial),lamp=lampEffects.group;

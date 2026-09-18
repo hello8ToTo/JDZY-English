@@ -8,6 +8,8 @@ import {nearbyCallout,leaderEndpoint} from './callout-layout.js';
 import {viewDirections,partView} from './view-presets.js';
 import {createPartEffects} from './part-effects.js';
 import {wheelRegion,hoodRegion} from './part-regions.js';
+import {loadHighlightSurfaces,projectedOutline} from './performance-cache.js';
+const highlightReady=loadHighlightSurfaces();
 let showroomVisible = true;
 window.addEventListener('message', event => {
  if(event.source===window.parent && event.data?.type==='global-drive-showroom-visibility') {showroomVisible=event.data.visible===true;if(!showroomVisible){pronunciation.stop();void fullscreen.exit();}}
@@ -42,20 +44,7 @@ function close(id){let c=open.get(id);if(!c)return;partEffects?.clear();pronunci
 function screenPosition(point){camera.updateMatrixWorld(true);const v=point.clone().project(camera);return{x:(v.x+1)*stage.clientWidth/2,y:(1-v.y)*stage.clientHeight/2}}
 function modelScreenBounds(){
  if(!modelBounds)return null;
- camera.updateMatrixWorld(true);
- const vertex=new T.Vector3();let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
- for(const mesh of meshes){
-  if(!mesh.visible)continue;
-  const positions=mesh.geometry.attributes.position;
-  if(!positions)continue;
-  for(let i=0;i<positions.count;i++){
-   vertex.fromBufferAttribute(positions,i).applyMatrix4(mesh.matrixWorld).project(camera);
-   if(vertex.z<-1||vertex.z>1)continue;
-   const x=(vertex.x+1)*stage.clientWidth/2,y=(1-vertex.y)*stage.clientHeight/2;
-   left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
-  }
- }
- return Number.isFinite(left)?{left,right,top,bottom}:null;
+ return projectedOutline(camera,stage.clientWidth,stage.clientHeight);
 }
 function calloutPosition(el,screen,id){const bounds=modelScreenBounds();if(!bounds)return{x:12,y:12};return nearbyCallout(bounds,screen,{width:el.offsetWidth,height:el.offsetHeight},{width:stage.clientWidth,height:stage.clientHeight},id===7?'right':undefined);}
 function select(id,focus=false,anchor=null){if(!loaded)return;if(open.has(id)){close(id);return}for(const previousId of [...open.keys()])close(previousId);const p=parts[id];if(focus)setView(partView(id,p.point));
@@ -91,8 +80,7 @@ function identify(h){const q=h.point,n=h.object.name+' '+(h.object.parent?.name|
  return null;}
 function hitPart(e){const h=hit(e);if(!h)return null;const id=identify(h);return id===null?null:{hit:h,id}}
 function updateCursor(){
- if(down){renderer.domElement.style.cursor='grabbing';return;}
- renderer.domElement.style.cursor=loaded&&hoverPoint&&hitPart(hoverPoint)?'grab':'default';
+ renderer.domElement.style.cursor=down?'grabbing':loaded?'grab':'default';
 }
 renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){hoverPoint={clientX:e.clientX,clientY:e.clientY};updateCursor();}});
 renderer.domElement.addEventListener('pointerleave',()=>{hoverPoint=null;if(!down)renderer.domElement.style.cursor='default';});
@@ -121,7 +109,11 @@ function restoreFbxMaterial(material){
 }
 const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);loader.parse(modelBytes.buffer,'',g=>{g.scene.scale.setScalar(.001);scene.add(g.scene);g.scene.updateMatrixWorld(true);modelBounds=new T.Box3().setFromObject(g.scene);const restored=new Set();g.scene.traverse(o=>{if(!o.isMesh)return;meshes.push(o);for(const material of(Array.isArray(o.material)?o.material:[o.material]))if(material&&!restored.has(material)){restored.add(material);restoreFbxMaterial(material)}});loaded=true;$('#loading').remove();window.autoExplorer={parts,select,close,setView,open,scene,camera,renderer,meshes,modelBounds,modelScreenBounds};},e=>{$('#loading').innerHTML='<strong>模型加载失败</strong><span>请使用支持 WebGL 的浏览器刷新重试。</span>';console.error(e)});
 const tmp=new T.Vector3();
-function updatePartEffects(){if(!loaded)return;if(!partEffects)partEffects=createPartEffects(scene,meshes,identify,window.matchMedia('(prefers-reduced-motion: reduce)').matches);partEffects.update(performance.now());}
+highlightReady.then(surfaces=>{
+ function initialize(){if(!loaded){setTimeout(initialize,50);return;}partEffects=createPartEffects(scene,meshes,identify,window.matchMedia('(prefers-reduced-motion: reduce)').matches,surfaces);const active=open.keys().next().value;if(active!==undefined)partEffects.select(active);}
+ initialize();
+}).catch(error=>console.error('预计算高亮加载失败',error));
+function updatePartEffects(){partEffects?.update(performance.now());}
 function tick(){requestAnimationFrame(tick);if(!showroomVisible)return;controls.update();updatePartEffects();renderer.render(scene,camera);if(!loaded)return;const w=stage.clientWidth,h=stage.clientHeight;for(const c of open.values()){tmp.copy(c.anchorPoint).project(camera);const x=(tmp.x+1)*w/2,y=(1-tmp.y)*h/2;{const end=leaderEndpoint({x,y},{x:c.x,y:c.y,width:c.el.offsetWidth});c.line.setAttribute('points',`${x},${y} ${end.x},${end.y}`);c.dot.setAttribute('d',`M ${x} ${y-6} l 6 6 -6 6 -6 -6 Z`);c.line.style.display=c.dot.style.display=tmp.z<1?'':'none';}}}tick();
 
 
