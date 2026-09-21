@@ -12,13 +12,13 @@ function switchView(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (view === 'progress') renderProgress();
   const showroomFrame = $('#showroom-frame');
-  if (view === 'showroom' && !showroomFrame.getAttribute('src')) {
+  if (showroomFrame && view === 'showroom' && !showroomFrame.getAttribute('src')) {
     showroomFrame.addEventListener('load', () => {
       showroomFrame.contentWindow.postMessage({ type: 'global-drive-showroom-visibility', visible: $('#showroom').classList.contains('active') }, '*');
     });
     showroomFrame.src = showroomFrame.dataset.src;
   }
-  if (showroomFrame.getAttribute('src')) {
+  if (showroomFrame?.getAttribute('src')) {
     showroomFrame.contentWindow.postMessage({ type: 'global-drive-showroom-visibility', visible: view === 'showroom' }, '*');
   }
 }
@@ -28,14 +28,15 @@ $$('.nav-trigger').forEach(button => button.addEventListener('click', () => swit
 let showroomOverflow = null;
 window.addEventListener('message', event => {
   const frame = $('#showroom-frame');
-  if (event.source !== frame.contentWindow || event.data?.type !== 'global-drive-showroom-fullscreen') return;
+  if (!frame || event.source !== frame.contentWindow || event.data?.type !== 'global-drive-showroom-fullscreen') return;
   const active = event.data.active === true && $('#showroom').classList.contains('active');
   frame.parentElement.classList.toggle('showroom-web-fullscreen', active);
   if (active && showroomOverflow === null) { showroomOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
   if (!active && showroomOverflow !== null) { document.body.style.overflow = showroomOverflow; showroomOverflow = null; }
 });
 window.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && showroomOverflow !== null) $('#showroom-frame').contentWindow.postMessage({type:'global-drive-showroom-exit-fullscreen'}, '*');
+  const frame = $('#showroom-frame');
+  if (event.key === 'Escape' && showroomOverflow !== null && frame) frame.contentWindow.postMessage({type:'global-drive-showroom-exit-fullscreen'}, '*');
 });
 
 // 需求解码器：固定国家案例库 + 随机案例库

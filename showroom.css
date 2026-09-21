@@ -1,4 +1,6 @@
 .showroom-shell{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#f5f8fc;box-shadow:0 5px 16px #15477f0b}
+.showroom-placeholder{min-height:360px;display:grid;place-items:center;padding:32px;text-align:center;background:linear-gradient(135deg,#eff8ff,#f7f4ff)}
+.showroom-placeholder>div{max-width:480px}.showroom-placeholder h3{margin:12px 0 8px;color:var(--ink)}.showroom-placeholder p{margin:0;color:var(--muted);line-height:1.8}
 .showroom-shell iframe{display:block;width:100%;height:760px;min-height:600px;border:0}
 .showroom-shell.showroom-web-fullscreen{position:fixed;inset:0;z-index:10000;border:0;border-radius:0}
 .showroom-shell.showroom-web-fullscreen iframe{height:100vh;min-height:0}
