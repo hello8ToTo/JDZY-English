@@ -1,6 +1,6 @@
 # Global Drive 新能源汽车海外销售英语实训系统
 
-本地可运行并适配腾讯云 EdgeOne Makers 的课程系统。网页可直接上传，AI 评分通过同源 Edge Function 安全调用讯飞星火。
+本地可运行并适配腾讯云 EdgeOne Makers 的课程系统。部署后，AI 评分通过同源 Cloud Function 安全调用讯飞星火。
 
 ## 已实现
 
@@ -15,12 +15,12 @@
 
 ## EdgeOne Makers 部署
 
-1. 在 EdgeOne Makers 创建“直接上传”项目并上传本目录。
+1. 在 EdgeOne Makers 创建并关联 Git 仓库项目，或创建“直接上传”项目并上传本目录。
 2. 在项目的生产环境变量中配置：
    - `XFYUN_API_KEY`：讯飞控制台生成的 API Key。
    - `XFYUN_MODEL`：`spark-x2.5-1.7b`。
    - `XFYUN_API_URL`：`https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions`。
-3. 重新部署后，浏览器会通过 `/api/evaluate` 使用讯飞星火实时评分。
+3. 重新部署后，浏览器会通过 `/api/evaluate` 使用讯飞星火实时评分。函数位于 `cloud-functions/api/evaluate.js`，密钥仅在服务端读取。
 
 不要把真实 API Key 写入 `.env.example`、`app.js`、HTML 或任何准备上传的文件。
 

@@ -143,7 +143,7 @@ function renderAiEvaluation(classificationScore, classificationCorrect, classifi
   panel.classList.remove('hidden');
 }
 async function requestAiEvaluation(item, question) {
-  const response = await fetch('https://global-drive-ai.49d5dpyf54.workers.dev', {
+  const response = await fetch('/api/evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
