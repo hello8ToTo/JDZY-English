@@ -99,15 +99,19 @@
       </section>
 
       <section class="screen" id="delivery">
-        <div class="screen-heading"><span class="mono">MODULE 03 · 拿下客户</span><h2>交付保障处</h2><p>将听懂的信息组织成一次客户确认语音，回听后再提交任务凭证。</p></div>
-        <div class="delivery-grid"><article class="mission-card"><span class="mono label">30-SECOND MISSION</span><h3>录制一段询盘确认语音</h3><ol><li>确认两条已获得的客户信息</li><li>提出一条仍需澄清的问题</li><li>说明下一步沟通安排</li></ol><div class="language-help"><b>LANGUAGE SUPPORT</b><span>Let me make sure I understand correctly…</span><span>Could you tell me more about…?</span><span>I will send you more information after confirming this.</span></div></article>
-          <article class="record-card"><div id="record-orb" class="record-orb">●</div><h3 id="record-title">点击开始录音</h3><p id="record-description">录制完成后可以回听，不满意可重新录制。</p><div id="audio-preview"></div><div class="record-actions"><button id="record-button" class="secondary">开始录音</button><button id="submit-record" class="primary" disabled>生成任务凭证</button></div></article>
-          <article id="receipt" class="receipt hidden"><div class="receipt-head"><span class="mono">GLOBAL DRIVE</span><b>任务完成凭证</b></div><h3>客户接待 · 30秒确认</h3><p><span>✓ 已确认信息</span><b>2 项</b></p><p><span>？有效追问</span><b>1 项</b></p><p><span>AI语音提示</span><b>可回听后自行修订</b></p><small>本地演示版：可截图任务凭证，再由学习通收集小组作品。</small></article></div>
+        <div class="screen-heading"><span class="mono">MODULE 03 · 拿下客户</span><h2>交付保障处</h2><p>完成一次真实的客户确认：说清已知需求、提出关键追问，并约定下一步。</p></div>
+        <div class="delivery-context"><div><span class="mono">CURRENT CUSTOMER · THAILAND</span><b>Narin · 曼谷网约车司机</b><p>客户高频在曼谷市区载客，关心车辆的日常续航与可靠性。</p></div><span class="delivery-badge">口语实战 · 45–60 秒</span></div>
+        <div class="delivery-grid">
+          <article class="mission-card delivery-mission"><span class="mono label">YOUR SPEAKING MISSION</span><h3>完成一段客户确认语音</h3><p class="mission-intro">你是销售顾问。请围绕本轮客户信息组织一段完整英文表达。</p><ol class="mission-list"><li><span>01</span><div><b>确认两条已知信息</b><small>例如：曼谷市区日常载客、关注续航与可靠性。</small></div></li><li><span>02</span><div><b>追问一项关键信息</b><small>例如：每日里程、充电条件或购车预算。</small></div></li><li><span>03</span><div><b>约定下一步沟通</b><small>例如：报价、车型资料或再次联系时间。</small></div></li></ol><div class="language-help"><b>USEFUL STARTERS</b><span>Let me make sure I understand correctly…</span><span>Could you tell me more about…?</span><span>I will send you more information after confirming this.</span></div></article>
+          <article class="record-card delivery-recorder"><div class="record-status"><span id="record-state">READY TO SPEAK</span><b id="record-timer">00:00</b><em>建议 45–60 秒</em></div><div id="record-orb" class="record-orb">●</div><h3 id="record-title">点击开始录音</h3><p id="record-description">录制完成后可以回听；不满意可重录。</p><div id="audio-preview"></div><div class="record-actions"><button id="record-button" class="secondary">开始录音</button><button id="submit-record" class="primary" disabled>提交 AI 评分</button></div><small class="record-privacy">录音仅在本次浏览器会话中使用，提交后将进入评分流程。</small></article>
+          <article id="delivery-report" class="delivery-report"><div class="report-head"><div><span class="mono">AI SPEAKING REPORT</span><h3>等待你的语音</h3></div><span class="report-status">未评分</span></div><div class="score-overview"><div class="score-ring"><strong>--</strong><span>/ 100</span></div><p>完成录音并提交后，系统将从任务完成、表达、流利度和发音四个维度给出反馈。</p></div><div class="score-breakdown"><div><span>任务完成度</span><b>--</b></div><div><span>表达准确与礼貌</span><b>--</b></div><div><span>流利度</span><b>--</b></div><div><span>发音清晰度</span><b>--</b></div></div><div class="report-note"><b>评分服务待接入</b><p>当前先完成录音与回听。接入讯飞语音能力后，此处会展示转写、分数与针对性改进建议。</p></div></article>
+        </div>
+        <article id="receipt" class="delivery-receipt hidden"><div class="receipt-head"><span class="mono">GLOBAL DRIVE · TASK EVIDENCE</span><b>已提交</b></div><div><h3>客户确认语音已保存</h3><p>本次完成录音与自我回听。语音 AI 服务接入后，可在此生成正式的评分凭证与改进记录。</p></div><button id="record-again" class="secondary">再录一次，争取更好表现</button></article>
       </section>
 
       <section class="screen" id="showroom">
         <div class="screen-heading"><span class="mono">MODULE 04 · 汽车部件探索</span><h2>车展区</h2><p>旋转观察汽车，点击部件查看中英文名称。</p></div>
-        <div class="showroom-shell showroom-placeholder"><div><span class="mono label">COMING SOON</span><h3>三维部件探索正在优化</h3><p>当前版本优先开放英语实训与 AI 评分。优化后的车型模型完成后将重新接入本模块。</p></div></div>
+        <div class="showroom-shell"><iframe id="showroom-frame" data-src="car-explorer/embed.html" title="车展区 · 五菱汽车三维部件探索" allow="fullscreen" allowfullscreen></iframe></div>
       </section>
 
       <section class="screen" id="progress">

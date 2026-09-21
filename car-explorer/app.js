@@ -1,8 +1,8 @@
 import * as T from './vendor/three.module.js';
 import {OrbitControls} from './vendor/addons/controls/OrbitControls.js';
 import {GLTFLoader} from './vendor/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from './vendor/addons/loaders/DRACOLoader.js';
 import {MeshoptDecoder} from './vendor/addons/libs/meshopt_decoder.module.js';
-import modelBytes from './wulin.glb';
 import {splitPronunciation,createPronunciation,setupFullscreen} from './experience.js';
 import {nearbyCallout,leaderEndpoint} from './callout-layout.js';
 import {viewDirections,partView} from './view-presets.js';
@@ -107,7 +107,8 @@ function restoreFbxMaterial(material){
  }
  material.needsUpdate=true;
 }
-const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);loader.parse(modelBytes.buffer,'',g=>{g.scene.scale.setScalar(.001);scene.add(g.scene);g.scene.updateMatrixWorld(true);modelBounds=new T.Box3().setFromObject(g.scene);const restored=new Set();g.scene.traverse(o=>{if(!o.isMesh)return;meshes.push(o);for(const material of(Array.isArray(o.material)?o.material:[o.material]))if(material&&!restored.has(material)){restored.add(material);restoreFbxMaterial(material)}});loaded=true;$('#loading').remove();window.autoExplorer={parts,select,close,setView,open,scene,camera,renderer,meshes,modelBounds,modelScreenBounds};},e=>{$('#loading').innerHTML='<strong>模型加载失败</strong><span>请使用支持 WebGL 的浏览器刷新重试。</span>';console.error(e)});
+const dracoLoader=new DRACOLoader();dracoLoader.setDecoderPath('./vendor/addons/libs/draco/');
+const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).setDRACOLoader(dracoLoader);loader.load('./wulin.glb',g=>{g.scene.scale.setScalar(1);scene.add(g.scene);g.scene.updateMatrixWorld(true);modelBounds=new T.Box3().setFromObject(g.scene);const restored=new Set();g.scene.traverse(o=>{if(!o.isMesh)return;meshes.push(o);for(const material of(Array.isArray(o.material)?o.material:[o.material]))if(material&&!restored.has(material)){restored.add(material);restoreFbxMaterial(material)}});loaded=true;$('#loading').remove();window.autoExplorer={parts,select,close,setView,open,scene,camera,renderer,meshes,modelBounds,modelScreenBounds};},undefined,e=>{$('#loading').innerHTML='<strong>模型加载失败</strong><span>请使用支持 WebGL 的浏览器刷新重试。</span>';console.error(e)});
 const tmp=new T.Vector3();
 highlightReady.then(surfaces=>{
  function initialize(){if(!loaded){setTimeout(initialize,50);return;}partEffects=createPartEffects(scene,meshes,identify,window.matchMedia('(prefers-reduced-motion: reduce)').matches,surfaces);const active=open.keys().next().value;if(active!==undefined)partEffects.select(active);}
