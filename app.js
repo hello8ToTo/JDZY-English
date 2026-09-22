@@ -254,13 +254,117 @@ const replies = { mileage: 'I usually drive around 180 to 220 kilometres a day. 
 $$('#follow-options button').forEach(button => button.addEventListener('click', () => { selectedTopic = button.dataset.topic; $$('#follow-options button').forEach(item => item.classList.remove('selected')); button.classList.add('selected'); $('#follow-question').focus(); $('#client-reply').classList.add('hidden'); }));
 $('#ask-client').addEventListener('click', () => { const question = $('#follow-question').value.trim(); const reply = $('#client-reply'); if (!selectedTopic) { reply.textContent = '请先选择一个待追问方向。'; reply.classList.remove('hidden'); return; } if (question.length < 6) { reply.textContent = '请先输入一句完整的英语追问。'; reply.classList.remove('hidden'); return; } reply.textContent = `AI客户回复：${replies[selectedTopic]}`; reply.classList.remove('hidden'); state.records = state.records.filter(item => item.id !== 'talk'); state.records.push({ id: 'talk', title: '交流互动台 · AI客户追问', value: '已完成 1 次有效追问' }); save(); });
 
-// 交付保障处：浏览器录音、回听、生成凭证
-let recorder, chunks = [], audioUrl = '';
+// 交付保障处：按国家案例进行听辨、追问与口语确认
+const deliveryCaseBank = {
+  thailand: [
+    ['曼谷网约车换电计划','Narin · 曼谷网约车司机','Hello, I drive passengers in Bangkok every day. I need two purple five-seat EVs before the rainy season. I normally drive about 220 kilometres a day and I am still unsure about home charging and delivery time.',['数量：两辆','颜色：紫色','座数：五座','电池：日常约 220 公里'],['充电：公寓附近的充电方式','时间：具体交付日期']],
+    ['清迈度假区接驳车','Pim · 清迈生态度假区运营人','Good morning. Our resort needs a white seven-seat shuttle for guests. It runs about 180 kilometres a day and must be ready before the November travel season. Please advise on battery range and charger installation.',['颜色：白色','座数：七座','时间：11 月旅游季前','电池：每日约 180 公里'],['车型：适合山路的车型','充电：度假区充电桩安装']],
+    ['普吉机场接送升级','Arun · 普吉机场接送服务商','Hi, I would like three black vehicles for airport transfers in Phuket. Each vehicle should carry four passengers and luggage. We need the first one in August, but I need to know the warranty and charging plan.',['数量：三辆','颜色：黑色','座数：四名乘客加行李','时间：8 月首车到位'],['电池：开空调后的真实续航','充电：机场附近补能方案']],
+    ['孔敬校园通勤项目','Mali · 孔敬大学后勤采购','Hello, our university is considering a compact EV for campus commuting. It needs six seats, a blue exterior, and a battery suitable for 120 kilometres each day. We have not decided the purchase quantity or payment schedule.',['车型：紧凑型校园通勤车','颜色：蓝色','座数：六座','电池：每日约 120 公里'],['数量：首批采购数量','时间：付款与采购时间表']]
+  ],
+  indonesia: [
+    ['雅加达高频通勤车辆','Dimas · 雅加达网约车司机','Hello, I work six days a week in Jakarta. I want one silver five-seat EV with at least 200 kilometres of practical range. I need it around September, but I do not know whether charging near my apartment is convenient.',['数量：一辆','颜色：银色','座数：五座','时间：9 月左右'],['电池：实际续航是否达到 200 公里','充电：公寓附近充电条件']],
+    ['泗水港区短驳物流','Rina · 泗水物流运营人','Good morning. We need four white delivery vans for Surabaya port. They will make many short stops and carry small parts. We prefer a delivery date before the year-end rush, and we need to discuss battery capacity.',['数量：四辆','颜色：白色','车型：货运厢式车','时间：年末旺季前'],['电池：频繁启停下的续航','座数：驾驶员与助手座位配置']],
+    ['巴厘酒店贵宾接送','Wayan · 巴厘精品酒店经理','Hi, our hotel needs two dark-blue seven-seat EVs for airport guests. The cars should have a comfortable battery range for island trips. We plan to start service in July and still need to clarify maintenance support.',['数量：两辆','颜色：深蓝色','座数：七座','时间：7 月投入服务'],['电池：岛内行程续航','车型：适合酒店接待的配置']],
+    ['万丹工业园班车','Sari · 工业园行政主管','Hello, we are selecting a commuter vehicle for our factory staff in Banten. We need a grey eight-seat model, running 90 kilometres per shift. The order may be six vehicles, but we need a firm quotation and delivery window.',['颜色：灰色','座数：八座','电池：每班约 90 公里','数量：可能六辆'],['时间：确认交付窗口','车型：适合员工班车的车型']]
+  ],
+  vietnam: [
+    ['胡志明市餐饮配送','Linh · 胡志明市配送车队主管','Hello, our food-delivery team needs three compact white EVs in Ho Chi Minh City. Each one travels about 160 kilometres daily. We want them before Tet, but we still need to ask about charging time and cargo layout.',['数量：三辆','颜色：白色','车型：紧凑型配送车','时间：春节前'],['电池：每日 160 公里的续航','座数：货物与乘员空间安排']],
+    ['河内企业租赁车队','Minh · 河内企业租赁经理','Good afternoon. We are looking for five black five-seat EVs for visiting clients in Hanoi. The lease should begin in October, and the cars need reliable batteries for city trips. We have not fixed the contract length.',['数量：五辆','颜色：黑色','座数：五座','时间：10 月开始租赁'],['电池：市区行程续航','时间：租赁合同期限']],
+    ['岘港滨海度假接驳','Hoa · 岘港度假区运营人','Hi, we need two light-blue seven-seat shuttles for a Da Nang beach resort. The route is about 120 kilometres, and guests will use them from June. Could you tell us about charging in hot coastal weather?',['数量：两辆','颜色：浅蓝色','座数：七座','时间：6 月启用'],['电池：高温海边环境续航','充电：度假区充电方式']],
+    ['海防零部件巡检','Tuan · 海防零部件供应商','Hello, I need a red compact EV for site visits around Hai Phong. It will travel around 140 kilometres per day and must carry two technicians. I am considering a purchase in November but need a battery warranty explanation.',['数量：一辆','颜色：红色','座数：两名技术员','时间：11 月考虑采购'],['电池：每日 140 公里与质保','车型：适合巡检的紧凑车型']]
+  ],
+  malaysia: [
+    ['吉隆坡医疗耗材配送','Aisha · 吉隆坡医疗配送采购','Hello, we need two white electric vans for medical supplies in Kuala Lumpur. They travel about 170 kilometres a day and should arrive in August. We still need to discuss battery reliability and the number of seats.',['数量：两辆','颜色：白色','车型：医疗耗材配送厢式车','时间：8 月到位'],['电池：每日 170 公里的可靠性','座数：驾驶与随车人员配置']],
+    ['柔佛跨境商务通勤','Farid · 柔佛商务顾问','Good morning. I want one dark-grey five-seat EV for trips near the Singapore border. I travel two or three times weekly and hope to purchase in September. Please clarify cross-border charging and the battery range.',['数量：一辆','颜色：深灰色','座数：五座','时间：9 月购车'],['充电：跨境充电便利性','电池：往返续航能力']],
+    ['槟城科技园员工班车','Mei · 槟城科技园行政部','Hi, our technology park plans to order four blue eight-seat commuter EVs. They run a fixed 90-kilometre route, including late shifts. We want to start in January, but charger installation is not confirmed.',['数量：四辆','颜色：蓝色','座数：八座','时间：1 月启用'],['充电：园区充电桩安装','电池：晚班固定路线续航']],
+    ['马六甲旅游租车项目','Hafiz · 马六甲旅游租车公司','Hello, we are comparing a seven-seat silver EV for family tourists in Melaka. We may start with two cars in December. The customer experience is important, and we need to know the practical range with air-conditioning.',['数量：两辆','颜色：银色','座数：七座','时间：12 月首批'],['电池：空调开启时的真实续航','车型：适合家庭游客的配置']]
+  ]
+};
+const deliveryCustomerGenders = {
+  thailand: ['male', 'female', 'male', 'female'],
+  indonesia: ['male', 'female', 'male', 'female'],
+  vietnam: ['female', 'male', 'female', 'male'],
+  malaysia: ['female', 'male', 'female', 'male']
+};
+const deliveryPortraits = {
+  thailand: { male: 'assets/delivery-customer-thailand.png', female: 'assets/delivery-customer-thailand-female.png' },
+  indonesia: { male: 'assets/delivery-customer-indonesia-male.png', female: 'assets/delivery-customer-indonesia.png' },
+  vietnam: { male: 'assets/delivery-customer-thailand.png', female: 'assets/delivery-customer-vietnam.png' },
+  malaysia: { male: 'assets/delivery-customer-malaysia.png', female: 'assets/delivery-customer-indonesia.png' }
+};
+let deliveryCountry = 'thailand', deliveryIndex = 0, deliveryAudio = null, deliveryPlaying = false, recorder, chunks = [], audioUrl = '', deliveryRecognition, deliveryFinalText = '', deliveryTimer, deliverySeconds = 0;
+const currentDeliveryCase = () => deliveryCaseBank[deliveryCountry][deliveryIndex];
+function deliveryMeta() { return countryMeta[deliveryCountry]; }
+function stopDeliveryClient() {
+  if (deliveryAudio) { deliveryAudio.pause(); deliveryAudio.currentTime = 0; deliveryAudio = null; }
+  deliveryPlaying = false;
+  $('#delivery-play-client').textContent = '▶';
+}
+function renderDeliveryLibrary() {
+  const available = Object.entries(countryMeta).map(([key, meta]) => `<button class="delivery-country-card" data-delivery-country="${key}"><div class="country-code">${meta.code}<img src="${meta.flag}" alt="${meta.label}国旗"></div><h4>${meta.label}</h4><small>进入案例库 →</small></button>`).join('');
+  const pending = [['MM','缅甸'],['SG','新加坡'],['PH','菲律宾'],['KH','柬埔寨']].map(([code, label]) => `<article class="delivery-country-card delivery-country-pending"><div class="country-code">＋<span>COMING SOON</span></div><h4>${label}</h4><small>案例库开发中</small></article>`).join('');
+  $('#delivery-country-cards').innerHTML = available + pending;
+  $$('[data-delivery-country]').forEach(button => button.onclick = () => { deliveryCountry = button.dataset.deliveryCountry; deliveryIndex = 0; $('#delivery-library').classList.add('hidden'); $('#delivery-workspace').classList.remove('hidden'); $('#delivery-back').classList.remove('hidden'); renderDeliveryCase(); });
+}
+function optionMarkup(type, label, kind) { return `<label class="delivery-option ${kind === 'ask' ? 'ask' : ''}"><input type="checkbox" data-delivery-${kind}="${escapeHtml(label)}"><span><span class="option-type">${escapeHtml(type)}</span><br>${escapeHtml(label)}</span></label>`; }
+function renderDeliveryCase() {
+  stopDeliveryClient();
+  const item = currentDeliveryCase(), meta = deliveryMeta();
+  $('#delivery-country').textContent = `${meta.code} · ${meta.label} CUSTOMER CASE`;
+  $('#delivery-title').textContent = item[0]; $('#delivery-order').textContent = `${deliveryIndex + 1} / 4`;
+  $('#delivery-previous').disabled = deliveryIndex === 0; $('#delivery-next').textContent = deliveryIndex === 3 ? '回到第 1 案例 →' : '下一案例 →';
+  const [clientName, clientRole] = item[1].split(' · ');
+  const gender = deliveryCustomerGenders[deliveryCountry][deliveryIndex];
+  $('#delivery-client-image').src = deliveryPortraits[deliveryCountry][gender]; $('#delivery-client-image').alt = `${clientName}客户形象`; $('#delivery-client-name').textContent = clientName; $('#delivery-client-role').textContent = clientRole || '';
+  $('#delivery-voice-note').textContent = '客户需求语音';
+  const heard = item[3].map(value => { const [type, label] = value.split('：'); return optionMarkup(type, label, 'heard'); }).join('');
+  const asks = item[4].map(value => { const [type, label] = value.split('：'); return optionMarkup(type, label, 'ask'); }).join('');
+  $('#delivery-heard-options').innerHTML = `<div class="delivery-option-title"><b>✓ 已听到的信息</b><span>至少勾选 3 条</span></div>${heard}`;
+  $('#delivery-ask-options').innerHTML = `<div class="delivery-option-title"><b>？需要进一步追问</b><span>至少勾选 1 条</span></div>${asks}`;
+  $('#delivery-check-feedback').textContent = '完成勾选后，请录制你的客户确认语音。'; $('#delivery-report').classList.add('hidden'); $('#delivery-report').innerHTML = ''; $('#audio-preview').innerHTML = ''; $('#submit-record').disabled = true; $('#record-title').textContent = '开始你的客户确认'; $('#record-description').textContent = '完成录音后先回听，再提交发音评分。';
+}
+function playDeliveryClient() {
+  const button = $('#delivery-play-client');
+  if (deliveryPlaying) { stopDeliveryClient(); return; }
+  stopDeliveryClient();
+  const clip = new Audio(`assets/delivery-audio/${deliveryCountry}-${deliveryIndex + 1}.wav`);
+  clip.playbackRate = 1;
+  clip.onended = () => { if (deliveryAudio === clip) stopDeliveryClient(); };
+  clip.onerror = () => { if (deliveryAudio === clip) { stopDeliveryClient(); $('#delivery-voice-note').textContent = '客户语音加载失败'; } };
+  deliveryAudio = clip; deliveryPlaying = true; button.textContent = '❚❚';
+  clip.play().catch(() => { if (deliveryAudio === clip) stopDeliveryClient(); });
+}
+function stopDeliveryRecording() { clearInterval(deliveryTimer); }
+function renderDeliveryRubric(heard, asks, complete) {
+  const taskScore = Math.min(100, heard.length * 20 + asks.length * 15);
+  const questionScore = asks.length ? Math.min(100, 65 + asks.length * 15 + (heard.length >= 3 ? 5 : 0)) : 0;
+  const title = complete ? '口语评分报告' : '提交前检查';
+  const status = complete ? '评分规则已就绪' : '请补齐任务';
+  const advice = complete
+    ? ['提问准确度已根据你选择的追问项预评分；接入语音识别后会结合实际口语内容复核。', '发音与流利度、礼貌交流将在讯飞语音评测与语音识别接入后自动评分。', '建议回听录音，确认是否包含：需求确认、至少一个追问，以及明确的下一步安排。']
+    : ['至少勾选 3 条已听到的信息和 1 条待追问项，再提交评分。', '完成录音并回听后，系统会生成本案例的口语评分报告。'];
+  $('#delivery-report').classList.remove('hidden');
+  $('#delivery-report').innerHTML = `<div class="report-head"><div><span class="mono">SPEAKING ASSESSMENT RUBRIC</span><h3>${title}</h3></div><span class="report-status">${status}</span></div><div class="delivery-score-grid"><div class="delivery-score">任务完成度<strong>${complete ? taskScore : '--'}</strong><span>信息确认与任务步骤</span></div><div class="delivery-score">提问准确度<strong>${complete ? questionScore : '--'}</strong><span>追问方向与案例匹配</span></div><div class="delivery-score pending-score">发音与流利度<strong>待接入</strong><span>准确度、标准度、流利度</span></div><div class="delivery-score pending-score">礼貌交流<strong>待接入</strong><span>礼貌表达与沟通推进</span></div></div><ul class="delivery-advice">${advice.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul><p class="delivery-sample"><b>后续接入规则：</b>讯飞语音评测负责发音与流利度；语音识别与星火模型负责提问准确度、礼貌表达和下一步沟通质量。</p>`;
+  setTimeout(() => $('#delivery-report').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+function submitDelivery() {
+  const heard = $$('[data-delivery-heard]:checked').map(input => input.dataset.deliveryHeard), asks = $$('[data-delivery-ask]:checked').map(input => input.dataset.deliveryAsk), item = currentDeliveryCase();
+  if (heard.length < 3 || asks.length < 1) { $('#delivery-check-feedback').textContent = '请至少勾选 3 条已听信息和 1 条待追问信息。'; renderDeliveryRubric(heard, asks, false); return; }
+  renderDeliveryRubric(heard, asks, true);
+  $('#delivery-check-feedback').textContent = `已完成：勾选 ${heard.length} 条已知信息、${asks.length} 条追问项，并完成录音回听。`;
+  state.records = state.records.filter(record => record.id !== `delivery-${deliveryCountry}-${deliveryIndex}`); state.records.push({ id: `delivery-${deliveryCountry}-${deliveryIndex}`, title: `交付保障处 · ${item[0]}`, value: '已完成录音与回听，等待发音评分服务' }); save();
+}
+$('#delivery-play-client').addEventListener('click', playDeliveryClient);
+$('#delivery-back').addEventListener('click', () => { stopDeliveryClient(); $('#delivery-workspace').classList.add('hidden'); $('#delivery-library').classList.remove('hidden'); $('#delivery-back').classList.add('hidden'); });
+$('#delivery-previous').addEventListener('click', () => { if (deliveryIndex > 0) { deliveryIndex--; renderDeliveryCase(); } });
+$('#delivery-next').addEventListener('click', () => { deliveryIndex = (deliveryIndex + 1) % 4; renderDeliveryCase(); });
 $('#record-button').addEventListener('click', async function () {
   if (recorder && recorder.state === 'recording') { recorder.stop(); return; }
-  try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); recorder = new MediaRecorder(stream); chunks = []; recorder.ondataavailable = event => chunks.push(event.data); recorder.onstop = () => { const blob = new Blob(chunks, { type: 'audio/webm' }); if (audioUrl) URL.revokeObjectURL(audioUrl); audioUrl = URL.createObjectURL(blob); $('#audio-preview').innerHTML = `<audio controls src="${audioUrl}"></audio>`; $('#record-title').textContent = '录音已完成，可回听或重录'; $('#record-description').textContent = '满意后请生成任务凭证。'; $('#record-orb').classList.remove('recording'); $('#record-button').textContent = '重新录制'; $('#submit-record').disabled = false; stream.getTracks().forEach(track => track.stop()); }; recorder.start(); $('#record-orb').classList.add('recording'); $('#record-title').textContent = '正在录音…'; $('#record-description').textContent = '再次点击“结束录音”完成本次录制。'; this.textContent = '结束录音'; } catch { $('#record-description').textContent = '无法使用麦克风。请在浏览器中允许麦克风权限后重试。'; }
+  try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); recorder = new MediaRecorder(stream); chunks = []; deliverySeconds = 0; $('#record-timer').textContent = '00:00'; deliveryTimer = setInterval(() => { deliverySeconds++; $('#record-timer').textContent = `${String(Math.floor(deliverySeconds / 60)).padStart(2, '0')}:${String(deliverySeconds % 60).padStart(2, '0')}`; }, 1000); recorder.ondataavailable = event => chunks.push(event.data); recorder.onstop = () => { stopDeliveryRecording(); const blob = new Blob(chunks, { type: 'audio/webm' }); if (audioUrl) URL.revokeObjectURL(audioUrl); audioUrl = URL.createObjectURL(blob); $('#audio-preview').innerHTML = `<audio controls src="${audioUrl}"></audio>`; $('#record-title').textContent = '录音已完成，请先回听'; $('#record-description').textContent = '满意后可提交发音评分。'; $('#record-orb').classList.remove('recording'); $('#record-state').textContent = 'READY TO REVIEW'; $('#record-button').textContent = '重新录制'; $('#submit-record').disabled = false; stream.getTracks().forEach(track => track.stop()); }; recorder.start(); $('#record-orb').classList.add('recording'); $('#record-state').textContent = 'RECORDING'; $('#record-title').textContent = '正在录音…'; $('#record-description').textContent = '再次点击“结束录音”完成本次录制。'; this.textContent = '结束录音'; } catch { $('#record-description').textContent = '无法使用麦克风。请在浏览器中允许麦克风权限后重试。'; }
 });
-$('#submit-record').addEventListener('click', () => { $('#receipt').classList.remove('hidden'); state.records = state.records.filter(item => item.id !== 'delivery'); state.records.push({ id: 'delivery', title: '交付保障处 · 客户确认语音', value: '已生成任务凭证' }); save(); });
+$('#submit-record').addEventListener('click', submitDelivery);
+renderDeliveryLibrary();
 function renderProgress() { const list = $('#progress-list'); list.innerHTML = state.records.length ? state.records.map(item => `<div class="record-item"><span>${item.title}</span><small>${item.value}</small></div>`).join('') : '<p class="feedback">尚无练习记录。完成任意模块任务后，记录会显示在这里。</p>'; }
 $('#reset-progress').addEventListener('click', () => { state.records = []; save(); renderProgress(); });
 renderProgress();
