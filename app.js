@@ -238,21 +238,16 @@ $('#decode-reset').addEventListener('click', () => renderDecoder());
 $('#clear-all-records').addEventListener('click', () => { state.records = []; localStorage.removeItem(storeKey); renderProgress(); });
 renderLibraryCards();
 
-// 交流互动台：浏览器英文语音 + 追问模拟
-const inquiryText = 'Hello, my name is Narin. I work as a ride hailing driver in Bangkok, and I drive passengers around the city almost every day. I need a reliable electric vehicle for daily use. I am especially concerned about the driving range and charging time. Could you tell me whether the car can meet my daily needs?';
-let speaking = false;
-$('#play-client').addEventListener('click', function () {
-  if (!('speechSynthesis' in window)) return alert('当前浏览器不支持语音播放，请使用 Chrome 或 Edge。');
-  if (speaking) { speechSynthesis.cancel(); speaking = false; this.textContent = '▶'; return; }
-  const utterance = new SpeechSynthesisUtterance(inquiryText); const voice = speechSynthesis.getVoices().find(item => item.lang.toLowerCase().startsWith('en'));
-  if (voice) utterance.voice = voice; utterance.lang = 'en-US'; utterance.rate = .84;
-  utterance.onend = () => { speaking = false; this.textContent = '▶'; }; speechSynthesis.cancel(); speechSynthesis.speak(utterance); speaking = true; this.textContent = '❚❚';
+// 交流互动台由同事交付的独立静态模块通过同源 iframe 嵌入。
+const conversationFrame = $('#conversation-frame');
+conversationFrame?.addEventListener('load', () => {
+  conversationFrame.contentWindow?.addEventListener('gd:conversation-complete', event => {
+    const result = event.detail || {};
+    state.records = state.records.filter(item => item.id !== 'talk');
+    state.records.push({ id: 'talk', title: '交流互动台 · 情景沟通练习', value: `完成 2 题，场景得分 ${result.total ?? '--'} 分` });
+    save();
+  });
 });
-$('#known-check').addEventListener('click', () => { const checked = $$('[data-known]:checked'); let correct = 0; checked.forEach(box => correct += Number(box.dataset.known === 'true')); const falseChecked = checked.length - correct; $('#known-feedback').textContent = `你勾选 ${checked.length} 项，其中 ${correct} 项与客户语音一致${falseChecked ? `；另有 ${falseChecked} 项需要回听核对。` : '。'}`; });
-let selectedTopic = '';
-const replies = { mileage: 'I usually drive around 180 to 220 kilometres a day. On weekends, it can be a little more.', quantity: 'For now, I plan to buy one vehicle first. If it works well, I may add another one later.', budget: 'My budget is around 900,000 Thai baht. I would also like to know whether installment payment is available.', charging: 'I live in an apartment, so I do not have a private charger. I mainly need to use public fast-charging stations.', delivery: 'I do not need the car immediately. Delivery sometime next month would be convenient for me.', priority: 'My top priority is driving range. I do not want to stop for charging too often during my working day.' };
-$$('#follow-options button').forEach(button => button.addEventListener('click', () => { selectedTopic = button.dataset.topic; $$('#follow-options button').forEach(item => item.classList.remove('selected')); button.classList.add('selected'); $('#follow-question').focus(); $('#client-reply').classList.add('hidden'); }));
-$('#ask-client').addEventListener('click', () => { const question = $('#follow-question').value.trim(); const reply = $('#client-reply'); if (!selectedTopic) { reply.textContent = '请先选择一个待追问方向。'; reply.classList.remove('hidden'); return; } if (question.length < 6) { reply.textContent = '请先输入一句完整的英语追问。'; reply.classList.remove('hidden'); return; } reply.textContent = `AI客户回复：${replies[selectedTopic]}`; reply.classList.remove('hidden'); state.records = state.records.filter(item => item.id !== 'talk'); state.records.push({ id: 'talk', title: '交流互动台 · AI客户追问', value: '已完成 1 次有效追问' }); save(); });
 
 // 交付保障处：按国家案例进行听辨、追问与口语确认
 const deliveryCaseBank = {
