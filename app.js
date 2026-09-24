@@ -240,13 +240,24 @@ renderLibraryCards();
 
 // 交流互动台由同事交付的独立静态模块通过同源 iframe 嵌入。
 const conversationFrame = $('#conversation-frame');
+const conversationBack = $('#conversation-back');
+const syncConversationNavigation = () => {
+  const onSceneList = !conversationFrame?.contentWindow || conversationFrame.contentWindow.location.hash === '#scenes';
+  conversationBack?.classList.toggle('hidden', onSceneList);
+};
 conversationFrame?.addEventListener('load', () => {
+  conversationFrame.contentWindow?.addEventListener('hashchange', syncConversationNavigation);
   conversationFrame.contentWindow?.addEventListener('gd:conversation-complete', event => {
     const result = event.detail || {};
     state.records = state.records.filter(item => item.id !== 'talk');
     state.records.push({ id: 'talk', title: '交流互动台 · 情景沟通练习', value: `完成 2 题，场景得分 ${result.total ?? '--'} 分` });
     save();
   });
+  syncConversationNavigation();
+});
+conversationBack?.addEventListener('click', () => {
+  if (conversationFrame?.contentWindow) conversationFrame.contentWindow.location.hash = 'scenes';
+  syncConversationNavigation();
 });
 
 // 交付保障处：按国家案例进行听辨、追问与口语确认

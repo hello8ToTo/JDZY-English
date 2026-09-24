@@ -12,6 +12,10 @@ function cleanModelJson(content) {
 }
 
 function buildPrompt(payload) {
+  if (payload.mode === 'conversation') {
+    const clientFacts = payload.clientFacts && typeof payload.clientFacts === 'object' ? payload.clientFacts : {};
+    return `You are both an overseas EV customer in a classroom role-play and a careful English-for-sales evaluator. Stay in character when replying to the student. Use ONLY the supplied client facts; never invent prices, specifications, promises, or personal details. If the question is unclear or asks for an unavailable fact, politely ask the student to clarify. Evaluate the student's English follow-up for relevance to missing information, clarity, politeness, and specificity. Do not penalize harmless regional spelling variants.\n\nScenario: ${payload.scenarioTitle}\nClient: ${payload.clientName} from ${payload.city}, ${payload.country}\nReception context: ${payload.context}\nWhat the client already said: ${payload.caseText}\nInformation selected by the student as heard: ${(payload.heard || []).join('; ')}\nFollow-up topic selected by the student: ${payload.topicLabel}\nTopic status: ${payload.topicStatus}\nAvailable client facts for role-play: ${Object.entries(clientFacts).map(([key, value]) => `${key}: ${value}`).join('; ')}\nStudent question: ${payload.question}\n\nReturn ONLY valid JSON with this exact shape: {"questionScore":0,"relevanceScore":0,"clarityScore":0,"politenessScore":0,"specificityScore":0,"clientReply":"...","advice":["...","..."],"sampleQuestion":"..."}. All five scores must be integers from 0 to 100. clientReply must be a concise natural English answer spoken as the client, using only the supplied facts. Write advice in Chinese. sampleQuestion must be a short, polite and specific English follow-up question for the selected topic.`;
+  }
   if (payload.mode === 'delivery') {
     return `You are an English-for-automotive-sales instructor. Assess a student's spoken client-confirmation task from its browser transcript. Do not claim to have heard the audio or to score pronunciation acoustically. Assess task completion, natural professional English, relevance of the follow-up, and whether the student agrees a next step.\n\nCase country: ${payload.country}\nCase title: ${payload.title}\nClient request: ${payload.caseText}\nInformation the student selected as heard: ${(payload.heard || []).join('; ')}\nInformation selected for follow-up: ${(payload.followUps || []).join('; ')}\nStudent transcript: ${payload.transcript}\n\nReturn ONLY valid JSON with this exact shape: {"overallScore":0,"taskScore":0,"interactionScore":0,"fluencyScore":0,"pronunciationScore":null,"advice":["...","...","..."],"sampleResponse":"..."}. Scores must be integers from 0 to 100. Write advice in Chinese. sampleResponse must be a short, natural English client-confirmation response that confirms known needs, asks about one missing item, and promises a clear next step.`;
   }
@@ -37,7 +41,11 @@ export async function onRequestPost(context) {
     return json({ message: '请求格式无效。' }, 400);
   }
 
-  const required = payload?.mode === 'delivery' ? ['country', 'title', 'caseText', 'transcript'] : ['country', 'title', 'caseText', 'question'];
+  const required = payload?.mode === 'delivery'
+    ? ['country', 'title', 'caseText', 'transcript']
+    : payload?.mode === 'conversation'
+      ? ['country', 'scenarioTitle', 'clientName', 'city', 'context', 'caseText', 'topicLabel', 'question']
+      : ['country', 'title', 'caseText', 'question'];
   if (!required.every(key => typeof payload?.[key] === 'string' && payload[key].trim())) {
     return json({ message: '缺少必要的评估内容。' }, 400);
   }
@@ -70,6 +78,18 @@ export async function onRequestPost(context) {
     }
 
     const result = cleanModelJson(upstreamBody?.choices?.[0]?.message?.content);
+    if (payload.mode === 'conversation') {
+      const scoreKeys = ['questionScore', 'relevanceScore', 'clarityScore', 'politenessScore', 'specificityScore'];
+      if (!scoreKeys.every(key => Number.isInteger(Number(result[key])) && Number(result[key]) >= 0 && Number(result[key]) <= 100)
+        || typeof result.clientReply !== 'string' || !Array.isArray(result.advice) || typeof result.sampleQuestion !== 'string') {
+        throw new Error('Model response does not match conversation schema');
+      }
+      return json(Object.fromEntries(scoreKeys.map(key => [key, Number(result[key])]).concat([
+        ['clientReply', result.clientReply.slice(0, 700)],
+        ['advice', result.advice.slice(0, 5).map(item => String(item).slice(0, 300))],
+        ['sampleQuestion', result.sampleQuestion.slice(0, 500)]
+      ])));
+    }
     if (payload.mode === 'delivery') {
       const scoreKeys = ['overallScore', 'taskScore', 'interactionScore', 'fluencyScore'];
       if (!scoreKeys.every(key => Number.isInteger(Number(result[key])) && Number(result[key]) >= 0 && Number(result[key]) <= 100) || !Array.isArray(result.advice) || typeof result.sampleResponse !== 'string') throw new Error('Model response does not match delivery schema');
